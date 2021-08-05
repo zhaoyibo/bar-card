@@ -1,6 +1,7 @@
 import { ActionConfig } from 'custom-card-helpers';
 
 export interface BarCardConfig {
+  minmax: any;
   entity_config: boolean;
   animation: any;
   attribute: any;

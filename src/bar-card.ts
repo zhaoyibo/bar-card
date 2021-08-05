@@ -24,6 +24,16 @@ console.info(
   'color: white; font-weight: bold; background: dimgray',
 );
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+async function fetchRecent(entityId, start, end, hass) {
+  let url = 'history/period';
+  if (start) url += `/${start.toISOString()}`;
+  url += `?filter_entity_id=${entityId}`;
+  if (end) url += `&end_time=${end.toISOString()}`;
+  url += '&minimal_response';
+  return hass.callApi('GET', url);
+}
+
 // TODO Name your custom element
 @customElement('bar-card')
 export class BarCard extends LitElement {
@@ -60,8 +70,8 @@ export class BarCard extends LitElement {
         color: 'var(--bar-card-color, var(--primary-color))',
         columns: 1,
         direction: 'right',
-        max: 100,
-        min: 0,
+        //max: 100,
+        //min: 0,
         positions: {
           icon: 'outside',
           indicator: 'outside',
@@ -78,10 +88,38 @@ export class BarCard extends LitElement {
     this._rowAmount = this._configArray.length / this._config.columns;
   }
 
+  private async getMinmax(enityId, start, end, hass) {
+    const response = await fetchRecent(enityId, start, end, hass);
+    const hist = response[0]
+      .map(function(o) {
+        return o.state;
+      })
+      .filter(item => item >= 0);
+
+    const min = Math.min(...hist);
+    const max = Math.max(...hist);
+    return [min, max];
+  }
+
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+  private async updateMinmax(hass) {
+    const end = new Date();
+    const start = new Date(new Date().getTime() - 24 * 60 * 60 * 1000);
+    for (let i = 0; i < this._configArray.length; i++) {
+      if (typeof this._configArray[i].minmax == 'undefined' || this._configArray[i].minmax.length == 0) {
+        const result = await this.getMinmax(this._configArray[i].entity, start, end, hass);
+        this._configArray[i].minmax = result;
+        this._configArray[i].min = result[0];
+        this._configArray[i].max = result[1];
+      }
+    }
+  }
+
   protected render(): TemplateResult | void {
     if (!this._config || !this.hass) {
       return html``;
     }
+    this.updateMinmax(this.hass);
 
     return html`
       <ha-card
