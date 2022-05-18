@@ -113,6 +113,7 @@ export class BarCard extends LitElement {
         this._configArray[i].max = result[1];
       }
     }
+    await this.requestUpdate();
   }
 
   protected render(): TemplateResult | void {
