@@ -110,12 +110,14 @@ export class BarCard extends LitElement {
       if (typeof this._configArray[i].minmax == 'undefined' || this._configArray[i].minmax.length == 0) {
         const result = await this.getMinmax(this._configArray[i].entity, start, end, hass);
         this._configArray[i].minmax = result;
-//         this._configArray[i].min = result[0];
-//         this._configArray[i].max = result[1];
-        max = max > result[1] ? max : result[1];
+        if (result[1] > max) {
+          max = result[1];
+        }
       }
     }
-    this._config.max = max
+    if (max > 0) {
+      this._config.max = max;
+    }
     await this.requestUpdate();
   }
 
