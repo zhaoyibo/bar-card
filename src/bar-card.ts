@@ -70,8 +70,8 @@ export class BarCard extends LitElement {
         color: 'var(--bar-card-color, var(--primary-color))',
         columns: 1,
         direction: 'right',
-        //max: 100,
-        //min: 0,
+        max: 100,
+        min: 0,
         positions: {
           icon: 'outside',
           indicator: 'outside',
@@ -105,14 +105,17 @@ export class BarCard extends LitElement {
   private async updateMinmax(hass) {
     const end = new Date();
     const start = new Date(new Date().getTime() - 24 * 60 * 60 * 1000);
+    let max = 0;
     for (let i = 0; i < this._configArray.length; i++) {
       if (typeof this._configArray[i].minmax == 'undefined' || this._configArray[i].minmax.length == 0) {
         const result = await this.getMinmax(this._configArray[i].entity, start, end, hass);
         this._configArray[i].minmax = result;
-        this._configArray[i].min = result[0];
-        this._configArray[i].max = result[1];
+//         this._configArray[i].min = result[0];
+//         this._configArray[i].max = result[1];
+        max = max > result[1] ? max : result[1];
       }
     }
+    this._config.max = max
     await this.requestUpdate();
   }
 
