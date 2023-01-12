@@ -76,7 +76,8 @@ export class BarCard extends LitElement {
           icon: 'outside',
           indicator: 'outside',
           name: 'inside',
-          minmax: 'off',
+          
+            : 'off',
           value: 'inside',
         },
       },
@@ -116,7 +117,7 @@ export class BarCard extends LitElement {
       }
     }
     if (max > 0) {
-      this._config.max = max;
+      this._config.max = max * 1.2;
     }
     await this.requestUpdate();
   }
